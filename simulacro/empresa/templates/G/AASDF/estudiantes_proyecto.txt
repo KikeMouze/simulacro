@@ -1,0 +1,22 @@
+@login_required
+def estudiantes_proyecto(request, proyecto_id):
+    # Obtener el objeto del proyecto o lanzar un error 404 si no existe
+    proyecto = get_object_or_404(Proyecto, pk=proyecto_id)
+    
+    # Obtener todos los estudiantes asociados a este proyecto
+    estudiantes = Estudiante.objects.filter(proyecto=proyecto)
+
+    # Iterar sobre los estudiantes para agregar información de horas trabajadas
+    for estudiante in estudiantes:
+        # Obtener las horas trabajadas asociadas a este estudiante y proyecto
+        horas_trabajadas = estudiante.horastrabajadas_set.filter(proyecto=proyecto).first()
+        
+        # Agregar las horas trabajadas al estudiante como un atributo
+        estudiante.horas_trabajadas = horas_trabajadas
+
+    # Renderizar la plantilla con la información del proyecto y los estudiantes
+    response = render(request, 'estudiantes_proyecto.html', {'proyecto': proyecto, 'estudiantes': estudiantes})
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'  # HTTP 1.1.
+    response['Pragma'] = 'no-cache'  # HTTP 1.0.
+    response['Expires'] = '0'  # Proxies.
+    return response

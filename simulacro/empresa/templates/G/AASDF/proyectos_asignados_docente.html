@@ -1,0 +1,99 @@
+{% extends "base_generic.html" %}
+{% block title %}Proyectos Asignados al Docente{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Proyectos Asignados al Docente</h1>
+    <form class="mb-3" method="GET">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Buscar por nombre de proyecto" aria-label="Buscar por nombre de proyecto" aria-describedby="button-addon2" id="searchInput" name="q" value="{{ query|default:"" }}">
+            <button class="btn btn-outline-secondary" type="submit" id="searchButton">Buscar</button>
+        </div>
+    </form>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% if page_obj %}
+            {% for proyecto in page_obj %}
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ proyecto.nombre }}</h5>
+                            <p class="card-text"><strong>Tipo:</strong> {{ proyecto.tipo_Proyecto }}</p>
+                            <p class="card-text"><strong>Lugar de ejecución:</strong> {{ proyecto.lugar_ejecucion_proyec }}</p>
+                            <p class="card-text"><strong>Modalidad:</strong> {{ proyecto.modalidad }}</p>
+                            <p class="card-text"><strong>Fecha de Creación:</strong> {{ proyecto.fechaCreacion }}</p>
+                            <p class="card-text"><strong>Estado del Proyecto:</strong> {{ proyecto.estadoProyecto }}</p>                            
+    
+                            <!-- Botón para mostrar el modal -->
+                            <div class="dropdown mt-3">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ proyecto.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Acciones
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ proyecto.id }}">
+                                    <li><a class="dropdown-item" href="{% url 'estudiantes_proyecto' proyecto.id %}">Registrados</a></li>
+                                
+                                </ul>
+                            </div>
+
+                            <!-- Lista de estudiantes -->
+                            <div id="estudiantes{{ proyecto.id }}" style="display: none;">
+                                <p>Estudiantes:</p>
+                                <ul class="list-group">
+                                    {% for estudiante in proyecto.estudiantes.all %}
+                                    <li class="list-group-item">{{ estudiante.paterno_apellido_alu }}, {{ estudiante.primer_nombre_alu }}</li>
+                                    {% endfor %}
+                                </ul>
+                                <input type="file" class="form-control mt-3" id="documento{{ proyecto.id }}" placeholder="Subir documento">
+                                
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No hay proyectos asignados al docente.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if page_obj.has_other_pages %}
+<div class="container">
+    <ul class="pagination justify-content-center mt-4">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|urlencode }}&page=1">&laquo; Primero</a></li>
+        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|urlencode }}&page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        {% for i in page_obj.paginator.page_range %}
+            {% if page_obj.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }} <span class="sr-only">(Actual)</span></span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|urlencode }}&page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|urlencode }}&page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|urlencode }}&page={{ page_obj.paginator.num_pages }}">Último &raquo;</a></li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
+<!-- Fin de paginación -->
+
+<script>
+    function mostrarEstudiantes(proyectoId) {
+        var listaEstudiantes = document.getElementById('estudiantes' + proyectoId);
+        if (listaEstudiantes.style.display === "none") {
+            listaEstudiantes.style.display = "block";
+        } else {
+            listaEstudiantes.style.display = "none";
+        }
+    }
+
+    function ocultarEstudiantes(proyectoId) {
+        var listaEstudiantes = document.getElementById('estudiantes' + proyectoId);
+        listaEstudiantes.style.display = "none";
+    }
+</script>
+{% endblock %}
+

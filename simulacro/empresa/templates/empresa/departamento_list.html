@@ -1,0 +1,101 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <h1 class="mt-4 mb-4">Lista de departamentos</h1>
+      <div class="col-md-12 mb-4">
+        <a href="{% url 'departamento-create' %}" class="btn btn-success">Crear departamento</a>
+      </div>
+      <form method="get" class="mb-4">
+        <div class="input-group">
+          <input type="text" class="form-control" name="q" placeholder="Buscar por nombre o detalle" value="{{ query }}" >
+          <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+      </form>
+     
+
+      <form method="get" class="mb-4">
+        <div class="input-group">
+            <select class="form-select" name="nombre">
+                <option value="" {% if not nombre %} selected {% endif %}>Todos los nombres</option>
+                {% for nombre_departamento in nombres %}
+                    <option value="{{ nombre_departamento }}" {% if nombre == nombre_departamento %} selected {% endif %}>{{ nombre_departamento }}</option>
+                {% endfor %}
+            </select>
+            <select class="form-select" name="descripcion">
+                <option value="" {% if not descripcion %} selected {% endif %}>Todas las descripciones</option>
+                {% for descripcion_departamento in descripciones %}
+                    <option value="{{ descripcion_departamento }}" {% if descripcion == descripcion_departamento %} selected {% endif %}>{{ descripcion_departamento }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+        </div>
+      </form>
+    
+
+      <li class="list-group-item py-2">
+        <a href="{% url 'buscar-departamento' %}" class="nav-link">
+            <i class="fas fa-clock"></i> Buscar por fecha departamento
+        </a>
+    </li>
+    
+
+
+
+
+
+
+
+
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Archivo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for departamento in object_list %}
+            <tr>
+              <td>{{ departamento.nombre }}</td>
+              <td>{{ departamento.descripcion }}</td>
+              <td>
+                {% if departamento.archivo %}
+                  <a href="{{ departamento.archivo.url }}" download="{{ departamento.archivo.name }}">{{ departamento.archivo.name }}</a>
+                {% else %}
+                  No archivo disponible
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'departamento-update' pk=departamento.pk %}" class="btn btn-primary">Actualizar</a>
+                <a href="{% url 'departamento-delete' pk=departamento.pk %}" class="btn btn-danger">Eliminar</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      {% if is_paginated %}
+        <div class="pagination">
+          <span class="page-links">
+            {% if object_list.has_previous %}
+              <a href="?page=1">&laquo; Primera</a>
+              <a href="?page={{ object_list.previous_page_number }}">Anterior</a>
+            {% endif %}
+            
+            {% if object_list.has_next %}
+              <a href="?page={{ object_list.next_page_number }}">Siguiente</a>
+              <a href="?page={{ object_list.paginator.num_pages }}">Anterior &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

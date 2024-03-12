@@ -1,0 +1,43 @@
+from django.db.models import Sum
+
+from django.http import HttpResponseForbidden
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import ensure_csrf_cookie
+@login_required
+@never_cache
+def proyecto_asignado(request):
+    user = request.user
+
+    # Verificar si el usuario pertenece al grupo de estudiantes
+    if user.groups.filter(name='Estudiantes').exists() :
+        # Obtener el objeto Estudiante relacionado con el usuario
+        estudiante = Estudiante.objects.get(user_profile__user=user)
+
+        # Obtener los proyectos asignados al estudiante con información adicional
+        proyectos_asignados = []
+
+        for proyecto in estudiante.proyectos.all():
+            horas_trabajadas = HorasTrabajadas.objects.filter(estudiante=estudiante, proyecto=proyecto).first()
+            docente_asociado = horas_trabajadas.docente if horas_trabajadas else None
+            estado_proyecto = horas_trabajadas.estado if horas_trabajadas else "En curso"
+
+            proyectos_asignados.append({
+                'proyecto': proyecto,
+                'horas': horas_trabajadas.horas if horas_trabajadas else 0,
+                'docente': docente_asociado,
+                'estado': estado_proyecto,
+            })
+
+        # Calcular la suma total de horas después de recorrer todos los proyectos
+        total_horas = HorasTrabajadas.objects.filter(estudiante=estudiante, proyecto__in=estudiante.proyectos.all(), estado='aprobadas').aggregate(Sum('horas'))['horas__sum']
+        
+        # Si total_horas es None, establecerlo en 0
+        total_horas = total_horas or 0
+        total_horas_ajustadas = total_horas - 240
+
+        # Renderizar la plantilla con los proyectos asignados y la suma total de horas
+        return render(request, 'catalog/proyectos_asignados.html', {'proyectos_asignados': proyectos_asignados, 'total_horas': total_horas,'total_horas_ajustadas': total_horas_ajustadas})
+
+    # Si el usuario no pertenece al grupo de estudiantes, retornar un error de acceso denegado
+    return HttpResponseForbidden('Acceso denegado')

@@ -1,0 +1,37 @@
+@login_required
+@never_cache
+def proyectos_asignados_docente(request):
+    user = request.user
+
+    # Verificar si el usuario pertenece al grupo de Docentes
+    if user.groups.filter(name='Docentes').exists():
+        try:
+            # Obtener el objeto Docente relacionado con el usuario
+            docente = Docente.objects.get(user_profile__user=user)
+
+            # Filtrar los proyectos asignados al docente por nombre si hay un término de búsqueda
+            query = request.GET.get('q')
+            if query:
+                proyectos_asignados = Proyecto.objects.filter(
+                    Q(horastrabajadas__docente=docente) & Q(nombre__icontains=query)
+                ).distinct()
+            else:
+                proyectos_asignados = Proyecto.objects.filter(horastrabajadas__docente=docente).distinct()
+
+            # Paginar los resultados
+            paginator = Paginator(proyectos_asignados, 4)  # 10 proyectos por página
+            page_number = request.GET.get('page')
+            page_obj = paginator.get_page(page_number)
+
+            # Renderizar la plantilla con los proyectos asignados al docente
+            return render(request, 'catalog/proyectos_asignados_docente.html', {'page_obj': page_obj, 'query': query})
+        except Docente.DoesNotExist:
+            # Si el usuario autenticado no está asociado a un docente, manejarlo según tu lógica de negocio
+            return render(request, 'catalog/error.html', {'message': 'No se encontró el docente asociado a este usuario'})
+
+    # Si el usuario no es un docente, redirigirlo a una página de acceso denegado o cualquier otra página
+    response = render(request, 'catalog/error.html', {'message': 'Acceso denegado'})
+    response['Cache-Control'] = 'no-cache, no-store, must-revalidate'  # HTTP 1.1.
+    response['Pragma'] = 'no-cache'  # HTTP 1.0.
+    response['Expires'] = '0'  # Proxies.
+    return response

@@ -1,0 +1,68 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Estudiantes del Proyecto: {{ proyecto.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Estudiantes del Proyecto: {{ proyecto.nombre }}</h1>
+    {% if estudiantes %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Horas Trabajadas</th>
+                    <th>Estado</th>
+                    <th>Acciones</th> <!-- Nueva columna para acciones -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for estudiante in estudiantes %}
+                    <tr>
+                        <td>{{ estudiante.primer_nombre_alu }} {{ estudiante.segundo_nombre_alu }}</td>
+                        <td>{{ estudiante.paterno_apellido_alu }} {{ estudiante.materno_apellido_alu }}</td>
+                        <td>
+                            {% with horas_trabajadas=estudiante.horastrabajadas_set.first %}
+                                {% if horas_trabajadas %}
+                                    {{ horas_trabajadas.horas }}
+                                {% else %}
+                                    No registrado
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% with horas_trabajadas=estudiante.horastrabajadas_set.first %}
+                                {% if horas_trabajadas %}
+                                    {{ horas_trabajadas.estado }}
+                                {% else %}
+                                    No registrado
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td> <!-- Botones de edición -->
+                            {% with horas_trabajadas=estudiante.horastrabajadas_set.first %}
+                                {% if horas_trabajadas %}
+                                    <form action="{% url 'editar-horas' horas_trabajadas.pk %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-primary">Editar</button>
+                                    </form>
+                                {% else %}
+                                    <span>No hay horas registradas</span>
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay estudiantes registrados para este proyecto.</p>
+    {% endif %}
+</div>
+
+<!-- Botón para descargar lista de estudiantes -->
+
+
+{% endblock %}
+
+

@@ -1,0 +1,41 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h2 class="mb-4">Proyectos Asignados</h2>
+    {% if proyectos_asignados %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Proyecto</th>
+                    <th scope="col" class="text-center">Horas</th>
+                    <th scope="col" class="text-center">Docente</th>
+                    <th scope="col" class="text-center">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proyecto_info in proyectos_asignados %}
+                    <tr>
+                        <td>{{ proyecto_info.proyecto.nombre }}</td>
+                        <td class="text-center">{{ proyecto_info.horas }} horas</td>
+                        <td class="text-center">{{ proyecto_info.docente }}</td>
+                        <td class="text-center">{{ proyecto_info.estado }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="mt-4">Horas faltantes: {{ total_horas_ajustadas }} horas de 240</p>
+        <p class="mt-4">Total de horas aprobadas: {{ total_horas }} horas</p>
+
+        {% if total_horas >= 240 %}
+            <p class="mt-4">Has completado la vinculación</p>
+        {% else %}
+            <p class="mt-4">Horas incompletas</p>
+        {% endif %}
+
+
+
+
+    {% else %}
+        <p>No hay proyectos asignados.</p>
+    {% endif %}
+{% endblock %}

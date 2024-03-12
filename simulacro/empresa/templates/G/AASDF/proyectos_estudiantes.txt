@@ -1,0 +1,32 @@
+from django.shortcuts import  redirect
+from .models import HorasTrabajadas
+from .forms import HorasTrabajadasForm
+@login_required
+def proyectos_estudiante(request, estudiante_id):
+    estudiante = Estudiante.objects.get(id=estudiante_id)
+    proyectos = estudiante.proyectos.all()
+    proyectos_asignados = []
+    total_horas = 0
+    for proyecto in proyectos:
+        horas_trabajadas = HorasTrabajadas.objects.filter(estudiante=estudiante, proyecto=proyecto, estado='aprobadas').first()
+        horas = horas_trabajadas.horas if horas_trabajadas else 0
+        proyecto_info = {
+            'proyecto': proyecto,
+            'horas': horas,
+            'docente': horas_trabajadas.docente if horas_trabajadas and horas_trabajadas.estado == 'aprobadas' else '',
+            'estado': horas_trabajadas.estado if horas_trabajadas and horas_trabajadas.estado == 'aprobadas' else '',
+        }
+        total_horas += horas
+        proyectos_asignados.append(proyecto_info)
+
+    total_horas_ajustadas = 240 - total_horas if total_horas < 240 else 0
+
+    context = {
+        'estudiante': estudiante,
+        'proyectos_asignados': proyectos_asignados,
+        'total_horas_ajustadas': total_horas_ajustadas,
+        'total_horas': total_horas,
+    }
+
+    return render(request, 'proyectos_estudiante.html', context)
+

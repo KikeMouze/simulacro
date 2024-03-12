@@ -1,0 +1,4 @@
+def proyectos_docente(request, docente_id):
+    docente = Docente.objects.get(id=docente_id)
+    proyectos = docente.horastrabajadas_set.values_list('proyecto__nombre', flat=True).distinct()
+    return render(request, 'catalog/proyectos_docente.html', {'docente': docente, 'proyectos': proyectos})

@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Proyectos asignados a {{ docente }}</h1>
+    <ul class="list-group">
+        {% for proyecto in proyectos %}
+        <li class="list-group-item">{{ proyecto }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
